@@ -111,6 +111,44 @@ headerhawk_report.json
 
 The report file is generated locally and is excluded from Git tracking by `.gitignore`.
 
+## Example Output
+
+The following is an illustrative example of the terminal report. Results will vary depending on the target website's HTTP response.
+
+```text
+HEADERHAWK SECURITY REPORT
+Target: https://example.com
+HTTP Status: 200
+==================================================
+
+[FOUND] Strict-Transport-Security
+
+[MISSING] Content-Security-Policy
+  Severity: MEDIUM
+  Risk: The application may lack an important browser-enforced content restriction.
+  Fix: Define a CSP appropriate to the application's scripts and resources.
+
+[MISSING] X-Content-Type-Options
+  Severity: LOW
+  Risk: Browsers may interpret some responses as a different content type.
+  Fix: Set X-Content-Type-Options: nosniff where appropriate.
+
+SUMMARY
+Headers checked: 5
+Headers found: 1
+Headers missing: 4
+
+JSON report saved to: headerhawk_report.json
+```
+
+*Note: This is illustrative output, not a record of the latest scan against the live website.*
+
+
+### Live Terminal Screenshot
+
+![HeaderHawk running in the terminal](headerhawk-demo.png)
+
+
 ## Running the Tests
 
 Run the automated test suite with:
