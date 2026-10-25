@@ -36,6 +36,31 @@ SECURITY_HEADERS = {
 }
 
 
+def is_valid_url(url):
+    if "://" not in url:
+        url = "https://" + url
+
+    parsed_url = urlparse(url)
+
+    try:
+        valid_port = parsed_url.port
+    except ValueError:
+        return False
+
+    if (
+        parsed_url.scheme not in ("http", "https")
+        or not parsed_url.hostname
+        or parsed_url.username is not None
+        or parsed_url.password is not None
+    ):
+        return False
+
+    if valid_port is not None and not (1 <= valid_port <= 65535):
+        return False
+
+    return True
+
+
 def check_security_headers(response_headers):
     findings = []
 
@@ -120,26 +145,11 @@ def main():
     if "://" not in url:
         url = "https://" + url
 
-    parsed_url = urlparse(url)
-
-    try:
-        valid_port = parsed_url.port
-    except ValueError:
-        print("Invalid URL. Check the website address and port.")
-        return
-
-    if (
-        parsed_url.scheme not in ("http", "https")
-        or not parsed_url.hostname
-        or parsed_url.username is not None
-        or parsed_url.password is not None
-    ):
+    
+    if not is_valid_url(url):
         print("Invalid URL. Enter a valid HTTP or HTTPS website address.")
         return
 
-    if valid_port is not None and not (1 <= valid_port <= 65535):
-        print("Invalid URL. The port must be between 1 and 65535.")
-        return
 
     analyse_website(url)
 
