@@ -3,6 +3,8 @@ import json
 import requests
 from urllib.parse import urlparse
 from datetime import datetime, timezone
+import ipaddress
+import socket
 
 # HeaderHawk - HTTP Security Header Analyser
 # Built by 404authority
@@ -36,6 +38,47 @@ SECURITY_HEADERS = {
 }
 
 
+def is_public_ip(ip):
+    try:
+        address = ipaddress.ip_address(ip)
+
+        return (
+            address.is_global
+            and not address.is_private
+            and not address.is_loopback
+            and not address.is_link_local
+            and not address.is_multicast
+            and not address.is_reserved
+            and not address.is_unspecified
+        )
+
+    except ValueError:
+        return False
+
+
+def hostname_resolves_to_public_ip(hostname, port):
+    try:
+        results = socket.getaddrinfo(
+            hostname,
+            port,
+            type=socket.SOCK_STREAM
+        )
+
+        if not results:
+            return False
+
+        for result in results:
+            ip_address = result[4][0]
+
+            if not is_public_ip(ip_address):
+                return False
+
+        return True
+
+    except (socket.gaierror, OSError, ValueError):
+        return False
+
+
 def is_valid_url(url):
     if "://" not in url:
         url = "https://" + url
@@ -57,6 +100,19 @@ def is_valid_url(url):
 
     if valid_port is not None and not (1 <= valid_port <= 65535):
         return False
+
+    hostname = parsed_url.hostname
+    port = valid_port or (443 if parsed_url.scheme == "https" else 80)
+
+    # Reject IP addresses that are not globally reachable.
+    try:
+        ipaddress.ip_address(hostname)
+        if not is_public_ip(hostname):
+            return False
+    except ValueError:
+        # The hostname is a domain name rather than a literal IP.
+        if not hostname_resolves_to_public_ip(hostname, port):
+            return False
 
     return True
 
@@ -85,7 +141,8 @@ def analyse_website(url):
         response = requests.get(
             url,
             timeout=10,
-            allow_redirects=False
+            allow_redirects=False,
+            headers={"User-Agent": "HeaderHawk/0.1.0"}
         )
 
         findings = check_security_headers(response.headers)

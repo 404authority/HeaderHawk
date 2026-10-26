@@ -1,147 +1,94 @@
-# HeaderHawk
+# HeaderHawk 🦅
 
-**A Python-based HTTP Security Header Analyser by 404authority**
-
-HeaderHawk is a lightweight security assessment tool that checks HTTP responses for five commonly recommended browser security headers. It identifies missing headers, explains potential risks, suggests remediation steps, and exports findings to a JSON report.
+**HeaderHawk** is a Python-based HTTP security header analyser built by **404authority**. It checks public websites for five commonly used HTTP security headers and generates a JSON report of its findings.
 
 ## Features
 
-- Analyses HTTP and HTTPS responses.
-- Checks five security-related HTTP headers.
-- Reports missing headers with severity labels and remediation guidance.
-- Displays a summary of findings in the terminal.
-- Exports scan results as a JSON report.
-- Validates URL schemes, hostnames, credentials, and ports.
-- Includes automated unit tests for header analysis, URL validation, and network errors.
-- Does not automatically follow HTTP redirects and displays a notice when a redirect response is received.
+- Checks five HTTP security headers:
+  - `Strict-Transport-Security`
+  - `Content-Security-Policy`
+  - `X-Content-Type-Options`
+  - `X-Frame-Options`
+  - `Referrer-Policy`
+- Reports headers as `FOUND` or `MISSING`.
+- Provides severity ratings, potential risks, and remediation recommendations for missing headers.
+- Validates HTTP and HTTPS URLs.
+- Checks resolved IP addresses and rejects hostnames that resolve to non-public addresses.
+- Uses a 10-second request timeout.
+- Does not automatically follow HTTP redirects.
+- Identifies itself using the `HeaderHawk/0.1.0` User-Agent.
+- Exports findings to a JSON report.
+- Includes automated unit tests.
 
-## Security Headers Checked
+## Requirements
 
-| Header | Purpose |
-|---|---|
-| `Strict-Transport-Security` | Helps browsers enforce HTTPS |
-| `Content-Security-Policy` | Controls permitted content sources |
-| `X-Content-Type-Options` | Helps prevent MIME-type sniffing |
-| `X-Frame-Options` | Provides a legacy control against framing |
-| `Referrer-Policy` | Controls referrer information sent by browsers |
-
-## Project Author
-
-
-**404authority** — Cybersecurity portfolio focused on Python security tools, web application security, and penetration testing.
-
+- Python 3.10 or newer
+- `requests`
 
 ## Installation
 
+Clone the repository:
 
-### Requirements
+```bash
+git clone https://github.com/404authority/HeaderHawk.git
+cd HeaderHawk
+```
 
-- Python 3.10 or later
-- pip (Python package installer)
-- Internet connection to install dependencies
+Install the dependency:
 
-### Setup
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/404authority/HeaderHawk.git
-   ```
-
-2. Enter the project directory:
-
-   ```bash
-   cd HeaderHawk
-   ```
-
-3. Install dependencies:
-
-   ```bash
-   py -m pip install -r requirements.txt
-   ```
-
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 
-Run HeaderHawk from the project directory:
+Run the analyser:
 
 ```bash
-py headerhawk.py
+python headerhawk.py
 ```
 
-Enter a website URL when prompted, for example:
+When prompted, enter an HTTP or HTTPS URL for a public website you own or have permission to assess.
+
+Example:
 
 ```text
 Enter an authorised website URL: https://example.com
 ```
 
-HeaderHawk displays the HTTP response status, the status of each checked security header, and a summary of its findings.
-
-The JSON report is saved as:
+HeaderHawk prints a report in the terminal and saves the results to:
 
 ```text
 headerhawk_report.json
 ```
 
-The report file is generated locally and is excluded from Git tracking by `.gitignore`.
-
-## Example Output
-
-The following is an illustrative example of the terminal report. Results will vary depending on the target website's HTTP response.
-
-```text
-HEADERHAWK SECURITY REPORT
-Target: https://example.com
-HTTP Status: 200
-==================================================
-
-[FOUND] Strict-Transport-Security
-
-[MISSING] Content-Security-Policy
-  Severity: MEDIUM
-  Risk: The application may lack an important browser-enforced content restriction.
-  Fix: Define a CSP appropriate to the application's scripts and resources.
-
-[MISSING] X-Content-Type-Options
-  Severity: LOW
-  Risk: Browsers may interpret some responses as a different content type.
-  Fix: Set X-Content-Type-Options: nosniff where appropriate.
-
-SUMMARY
-Headers checked: 5
-Headers found: 1
-Headers missing: 4
-
-JSON report saved to: headerhawk_report.json
-```
-
-*Note: This is illustrative output, not a record of the latest scan against the live website.*
-
-
-### Live Terminal Screenshot
-
-![HeaderHawk running in the terminal](headerhawk-demo.png)
-
+The JSON report includes the requested URL, response status, scan timestamp, header counts, and individual findings.
 
 ## Running the Tests
 
-The automated test suite contains 9 tests covering security-header analysis, URL validation, simulated HTTP responses, network connection failures, and HTTP redirect handling. The redirect test verifies that automatic redirects are disabled and that HeaderHawk displays a notice when a redirect response is received.
+Run the automated test suite:
+
+```bash
+python -m unittest -v
 ```
 
-The tests cover security-header analysis, URL validation, simulated HTTP responses, and network connection failures.
+The tests cover URL validation, security header checks, public-IP validation, network failures, and redirect handling.
 
-## Limitations and Responsible Use
+## Security Limitations
 
-- HeaderHawk checks whether selected headers are present; it does not fully evaluate whether their values are secure.
-- A missing header is an assessment finding, not proof that a website is exploitable.
-- The current URL validation does not provide comprehensive protection against server-side request forgery (SSRF) or requests to internal network destinations.
-- HTTP redirects are not followed automatically. Redirect responses trigger a notice, and the destination is not scanned.
-- The tool is intended for learning and preliminary assessment, not as a replacement for a comprehensive security audit.
+HeaderHawk is an educational security assessment tool, not a complete SSRF prevention solution.
 
-Only scan websites and systems you own or have explicit permission to assess.
+- DNS resolution is checked before the HTTP request, but the HTTP client may resolve the hostname again when connecting. This leaves a potential DNS-rebinding risk.
+- Redirects are disabled, but this alone does not guarantee that all requests are restricted to safe network destinations.
+- The tool checks whether headers are present; it does not fully evaluate whether their values provide an effective security policy.
+- Only assess websites you own or have explicit permission to test.
 
-## Licence
+Do not treat the current IP checks as a substitute for network isolation or connection-level destination enforcement in production systems.
 
-No open-source licence has been specified yet. Unless you add a licence, others generally do not receive explicit permission to redistribute or modify this project.
+## Project Purpose
 
-**404authority** — Cybersecurity and Python security tooling portfolio.
+HeaderHawk demonstrates foundational Python development, HTTP request handling, URL validation, security-header analysis, JSON reporting, error handling, and automated testing.
+
+**Author:** 404authority  
+**Version:** 0.1.0  
+**Language:** Python
