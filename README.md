@@ -13,6 +13,7 @@ HeaderHawk is a lightweight security assessment tool that checks HTTP responses 
 - Exports scan results as a JSON report.
 - Validates URL schemes, hostnames, credentials, and ports.
 - Includes automated unit tests for header analysis, URL validation, and network errors.
+- Does not automatically follow HTTP redirects and displays a notice when a redirect response is received.
 
 ## Security Headers Checked
 
@@ -59,33 +60,6 @@ HeaderHawk is a lightweight security assessment tool that checks HTTP responses 
    py -m pip install -r requirements.txt
    ```
 
-
-### Requirements
-
-- Python 3.10 or later
-- pip (Python package installer)
-
-### Setup
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/404authority/HeaderHawk.git
-   ```
-
-2. Enter the project directory:
-
-   ```bash
-   cd HeaderHawk
-   ```
-
-3. Install the required dependency:
-
-   ```bash
-   py -m pip install -r requirements.txt
-   ```
-
-   On systems where `py` is unavailable, use `python -m pip install -r requirements.txt`.
 
 ## Usage
 
@@ -151,10 +125,7 @@ JSON report saved to: headerhawk_report.json
 
 ## Running the Tests
 
-Run the automated test suite with:
-
-```bash
-py -m unittest -v
+The automated test suite contains 9 tests covering security-header analysis, URL validation, simulated HTTP responses, network connection failures, and HTTP redirect handling. The redirect test verifies that automatic redirects are disabled and that HeaderHawk displays a notice when a redirect response is received.
 ```
 
 The tests cover security-header analysis, URL validation, simulated HTTP responses, and network connection failures.
@@ -164,7 +135,7 @@ The tests cover security-header analysis, URL validation, simulated HTTP respons
 - HeaderHawk checks whether selected headers are present; it does not fully evaluate whether their values are secure.
 - A missing header is an assessment finding, not proof that a website is exploitable.
 - The current URL validation does not provide comprehensive protection against server-side request forgery (SSRF) or requests to internal network destinations.
-- HTTP redirects are followed. Use only authorised targets and trusted environments.
+- HTTP redirects are not followed automatically. Redirect responses trigger a notice, and the destination is not scanned.
 - The tool is intended for learning and preliminary assessment, not as a replacement for a comprehensive security audit.
 
 Only scan websites and systems you own or have explicit permission to assess.
