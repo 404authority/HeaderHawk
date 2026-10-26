@@ -85,7 +85,7 @@ def analyse_website(url):
         response = requests.get(
             url,
             timeout=10,
-            allow_redirects=True
+            allow_redirects=False
         )
 
         findings = check_security_headers(response.headers)
@@ -108,9 +108,16 @@ def analyse_website(url):
         }
 
         print("\nHEADERHAWK SECURITY REPORT")
+       
         print(f"Target: {url}")
         print(f"HTTP Status: {response.status_code}")
+
+        if 300 <= response.status_code < 400:
+            print("NOTICE: The website returned a redirect response.")
+            print("HeaderHawk did not follow the redirect.")
+
         print("=" * 50)
+
 
         for item in findings:
             print(f"\n[{item['status']}] {item['header']}")

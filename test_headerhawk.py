@@ -2,6 +2,8 @@
 import unittest
 from urllib.parse import urlparse
 from unittest.mock import patch, Mock
+from io import StringIO
+from contextlib import redirect_stdout
 import requests
 
 from headerhawk import (
@@ -121,7 +123,7 @@ class TestHeaderHawk(unittest.TestCase):
         mock_get.assert_called_once_with(
             "https://example.com",
             timeout=10,
-            allow_redirects=True
+            allow_redirects=False
         )
 
         mock_dump.assert_called_once()
@@ -130,6 +132,41 @@ class TestHeaderHawk(unittest.TestCase):
             "w",
             encoding="utf-8"
         )
+
+
+    
+   
+    @patch("headerhawk.requests.get")
+    @patch("builtins.input", return_value="https://example.com")
+    def test_redirect_response_is_not_followed(self, mock_input, mock_get):
+        mock_response = Mock()
+        mock_response.status_code = 302
+        mock_response.headers = {"Location": "https://other-example.com"}
+        mock_response.url = "https://example.com"
+        mock_get.return_value = mock_response
+
+        output = StringIO()
+
+        with patch("builtins.open", unittest.mock.mock_open()):
+            with patch("headerhawk.json.dump"):
+                with redirect_stdout(output):
+                    main()
+
+        mock_get.assert_called_once_with(
+            "https://example.com",
+            timeout=10,
+            allow_redirects=False
+        )
+
+        self.assertIn(
+            "NOTICE: The website returned a redirect response.",
+            output.getvalue()
+        )
+        self.assertIn(
+            "HeaderHawk did not follow the redirect.",
+            output.getvalue()
+        )
+
 
     
     @patch("headerhawk.requests.get")
