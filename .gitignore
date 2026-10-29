@@ -1,7 +1,3 @@
-
-# Generated scan reports
-headerhawk_report.json
-
 # Python cache files
 __pycache__/
 *.py[cod]
@@ -9,3 +5,10 @@ __pycache__/
 # Virtual environments
 .venv/
 venv/
+
+# Generated reports
+headerhawk_report.json
+
+# Test and coverage files
+.coverage
+.pytest_cache/

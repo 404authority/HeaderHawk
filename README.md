@@ -1,28 +1,37 @@
-# HeaderHawk 🦅
+# HeaderHawk
 
-**HeaderHawk** is a Python-based HTTP security header analyser built by **404authority**. It checks public websites for five commonly used HTTP security headers and generates a JSON report of its findings.
+**HeaderHawk v0.2.0** is a lightweight Python command-line tool that checks HTTP security headers on a website and generates a JSON report.
+
+Built by **404authority** as a beginner-friendly cybersecurity portfolio project.
 
 ## Features
 
-- Checks five HTTP security headers:
-  - `Strict-Transport-Security`
-  - `Content-Security-Policy`
-  - `X-Content-Type-Options`
-  - `X-Frame-Options`
-  - `Referrer-Policy`
-- Reports headers as `FOUND` or `MISSING`.
-- Provides severity ratings, potential risks, and remediation recommendations for missing headers.
-- Validates HTTP and HTTPS URLs.
-- Checks resolved IP addresses and rejects hostnames that resolve to non-public addresses.
-- Uses a 10-second request timeout.
+- Checks five common HTTP security headers.
+- Reports missing headers and explains their security purpose.
+- Provides recommendations for improving header configuration.
+- Displays a terminal summary.
+- Saves findings in JSON format.
+- Validates URL format, schemes, ports, and target IP addresses.
+- Checks DNS results before making a request.
 - Does not automatically follow HTTP redirects.
-- Identifies itself using the `HeaderHawk/0.1.0` User-Agent.
-- Exports findings to a JSON report.
+- Supports a configurable request timeout.
 - Includes automated unit tests.
+
+## Security Headers Checked
+
+| Header | Purpose |
+| --- | --- |
+| `Strict-Transport-Security` | Encourages browsers to use HTTPS for future connections. |
+| `Content-Security-Policy` | Helps restrict the sources from which a page can load content. |
+| `X-Content-Type-Options` | Helps prevent MIME-type sniffing. |
+| `X-Frame-Options` | Helps control whether a page can be embedded in frames. |
+| `Referrer-Policy` | Controls how much referrer information browsers send. |
+
+A missing header is an observation, not automatic proof that a website is vulnerable. The appropriate configuration depends on the application and its requirements.
 
 ## Requirements
 
-- Python 3.10 or newer
+- Python 3.10 or later
 - `requests`
 
 ## Installation
@@ -37,58 +46,88 @@ cd HeaderHawk
 Install the dependency:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+```
+
+For a safer, isolated installation, use a Python virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
 ## Usage
 
-Run the analyser:
+Analyse a website:
 
 ```bash
-python headerhawk.py
+python headerhawk.py example.com
 ```
 
-When prompted, enter an HTTP or HTTPS URL for a public website you own or have permission to assess.
+HeaderHawk normalises a hostname to HTTPS when a scheme is not supplied.
 
-Example:
+Choose the JSON report filename:
 
-```text
-Enter an authorised website URL: https://example.com
+```bash
+python headerhawk.py example.com --output report.json
 ```
 
-HeaderHawk prints a report in the terminal and saves the results to:
+Set the request timeout in seconds:
 
-```text
-headerhawk_report.json
+```bash
+python headerhawk.py example.com --timeout 15
 ```
 
-The JSON report includes the requested URL, response status, scan timestamp, header counts, and individual findings.
+Display command-line help:
+
+```bash
+python headerhawk.py --help
+```
+
+The default JSON report filename is `headerhawk_report.json`, which is excluded from version control.
 
 ## Running the Tests
 
-Run the automated test suite:
+Run the automated unit tests:
 
 ```bash
 python -m unittest -v
 ```
 
-The tests cover URL validation, security header checks, public-IP validation, network failures, and redirect handling.
+The tests cover URL validation, IP address checks, security-header findings, report structure, redirect handling, network errors, and command-line arguments.
 
-## Security Limitations
+## Security Considerations and Limitations
 
-HeaderHawk is an educational security assessment tool, not a complete SSRF prevention solution.
+- **Authorisation:** Only test websites you own or have explicit permission to assess.
+- **Redirects:** HeaderHawk does not automatically follow HTTP redirects. A redirect response may therefore describe the redirecting server rather than the final destination.
+- **DNS checks:** DNS resolution is checked before the HTTP request, but DNS answers can change between validation and connection. This means the checks are not a complete defence against DNS rebinding or server-side request forgery (SSRF).
+- **Public IP checks:** IP validation reduces the risk of accidentally targeting private or non-public addresses, but it does not replace network-level security controls.
+- **Header interpretation:** The tool checks whether selected headers are present. It does not fully validate each policy's correctness or assess the entire website's security.
+- **Network behaviour:** Results can be affected by connectivity, server configuration, proxies, and the target's response.
 
-- DNS resolution is checked before the HTTP request, but the HTTP client may resolve the hostname again when connecting. This leaves a potential DNS-rebinding risk.
-- Redirects are disabled, but this alone does not guarantee that all requests are restricted to safe network destinations.
-- The tool checks whether headers are present; it does not fully evaluate whether their values provide an effective security policy.
-- Only assess websites you own or have explicit permission to test.
+HeaderHawk is an educational assessment aid, not a substitute for a comprehensive security review.
 
-Do not treat the current IP checks as a substitute for network isolation or connection-level destination enforcement in production systems.
+## Project Structure
 
-## Project Purpose
+```text
+HeaderHawk/
+├── headerhawk.py
+├── test_headerhawk.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+└── headerhawk-demo.png
+```
 
-HeaderHawk demonstrates foundational Python development, HTTP request handling, URL validation, security-header analysis, JSON reporting, error handling, and automated testing.
+The screenshot may be absent in a local checkout if it has not been added to the repository.
 
-**Author:** 404authority  
-**Version:** 0.1.0  
-**Language:** Python
+## Version
+
+Current version: `0.2.0`
+
+## Author
+
+**404authority**
+
+GitHub: https://github.com/404authority
